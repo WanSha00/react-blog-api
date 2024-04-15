@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const authRoute = require("./routes/auth");
+const userRoute = require("./routes/users");
 
 dotenv.config();
 app.use(cors());
@@ -23,6 +24,7 @@ const connect = async()=>{
 connect();
 
 app.use("/api/auth", authRoute);
+app.use("/api/users", userRoute);
 
 app.listen("5000", () => {
   console.log("Server is running...");
