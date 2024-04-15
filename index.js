@@ -2,16 +2,27 @@ const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const cors = require("cors");
+const authRoute = require("./routes/auth");
 
 dotenv.config();
-mongoose
-  .connect(process.env.MONGO_URL)
-  .then(console.log("db connected..."))
-  .catch((err) => console.log("db error: " + err));
+app.use(cors());
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-app.use("/", (req, res) => {
-  console.log("home...");
-});
+const connect = async()=>{
+  try{
+      await mongoose.connect(process.env.MONGO_URL);
+      console.log("db connected...");
+  }catch(error){
+      throw(error);
+  }
+}
+
+connect();
+
+app.use("/api/auth", authRoute);
 
 app.listen("5000", () => {
   console.log("Server is running...");
