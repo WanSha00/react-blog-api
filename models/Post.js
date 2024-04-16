@@ -4,8 +4,7 @@ const PostSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true,
-      unique: true,
+      required: true
     },
     desc: {
       type: String,
@@ -27,4 +26,4 @@ const PostSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-mongoose.exports = mongoose.model("Post", PostSchema);
+module.exports = mongoose.model("Post", PostSchema);
