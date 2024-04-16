@@ -37,25 +37,33 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   if (req.body.userID === req.params.id) {
     try {
-
       const user = await User.findById(req.params.id);
       try {
-        const userPost = await Post.find({username:user.username});
-        await Post.deleteMany({username : user.username});
+        const userPost = await Post.find({ username: user.username });
+        await Post.deleteMany({ username: user.username });
         await User.findByIdAndDelete(req.params.id);
 
         res.status(200).json("User has been deleted.");
-
       } catch (error) {
-        console.log("delete error  >>  " + error);
         res.status(500).json(error);
       }
     } catch (error) {
-      console.log("no user error  >>  " + error)
       res.status(404).json("User not found.");
     }
   } else {
     res.status(401).json("You can only delete your account.");
   }
 });
+
+//get a User
+router.get("/:id", async(req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    const { password, ...others } = user._doc;
+    res.status(200).json(others);
+  } catch (error) {
+    res.status(404).json("User not found.");
+  }
+});
+
 module.exports = router;
