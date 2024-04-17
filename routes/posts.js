@@ -80,16 +80,6 @@ router.get("/:id", async (req, res) => {
 });
 
 //get all posts
-// router.get("/", async (req, res) => {
-//   try {
-//     const posts = await Post.find();
-//     res.status(200).json(posts);
-//   } catch (error) {
-//     res.status(404).json("Posts not found.");
-//   }
-// });
-
-//get all posts
 router.get("/", async (req, res) => {
   const username = req.query.user;
   const category = req.query.category;
