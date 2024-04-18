@@ -3,6 +3,8 @@ const app = express();
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const multer = require("multer");
+
 const authRoute = require("./routes/auth");
 const userRoute = require("./routes/users");
 const postRoute = require("./routes/posts");
@@ -14,16 +16,31 @@ app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const connect = async()=>{
-  try{
-      await mongoose.connect(process.env.MONGO_URL);
-      console.log("db connected...");
-  }catch(error){
-      throw(error);
+const connect = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URL);
+    console.log("db connected...");
+  } catch (error) {
+    throw error;
   }
-}
+};
 
 connect();
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, "test.jpeg");
+  },
+});
+
+const upload = multer({ storage: storage });
+
+app.post("/api/upload", upload.single("file"), (req, res) => {
+  res.status(200).json("File has been uploaded.");
+});
 
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
