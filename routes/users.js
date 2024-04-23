@@ -62,6 +62,19 @@ router.get("/:id", async(req, res) => {
     const { password, ...others } = user._doc;
     res.status(200).json(others);
   } catch (error) {
+  
+    res.status(404).json("User not found.");
+  }
+});
+
+router.get("/info/:name", async(req, res) => {
+  try {
+    
+    const user = await User.findOne({username: req.params.name});
+    const { password, ...others } = user._doc;
+    res.status(200).json(others);
+  } catch (error) {
+    console.log(error)
     res.status(404).json("User not found.");
   }
 });
