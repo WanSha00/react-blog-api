@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
-const mongoose = require("mongoose");
+const connectDB = require("./config/database");
 const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
@@ -18,16 +18,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "/images")));
 
-const connect = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URL);
-    console.log("db connected...");
-  } catch (error) {
-    throw error;
-  }
-};
 
-connect();
+
+connectDB();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -49,6 +42,6 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/categories", categoryRoutes);
 
-app.listen("5000", () => {
+app.listen(process.env.PORT, () => {
   console.log("Server is running...");
 });
