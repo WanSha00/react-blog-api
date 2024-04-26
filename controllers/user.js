@@ -34,6 +34,14 @@ module.exports = {
       }
 
       try {
+        if (req.body.username) {
+          const prevUser = await User.findById(req.params.id);
+          await Post.updateMany(
+            { username: prevUser.username },
+            { $set: { username: req.body.username } }
+          );
+        }
+
         const updatedUser = await User.findByIdAndUpdate(
           req.params.id,
           {
@@ -44,6 +52,7 @@ module.exports = {
 
         res.status(200).json(updatedUser);
       } catch (error) {
+        console.log(error);
         res.status(500).json(error);
       }
     } else {
