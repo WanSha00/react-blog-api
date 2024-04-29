@@ -31,7 +31,10 @@ module.exports = {
   updatePost: async (req, res) => {
     try {
       const post = await Post.findById(req.params.id);
-      await cloudinary.uploader.destroy("blog/" + post.cloudinaryId);
+      if(req.body.cloudinaryId!==post.cloudinaryId){
+        await cloudinary.uploader.destroy("blog/" + post.cloudinaryId);
+      }
+      
       const updatedPost = await Post.findByIdAndUpdate(
         req.params.id,
         {
