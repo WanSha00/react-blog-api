@@ -5,9 +5,6 @@ const userController = require("../controllers/user");
 //get user by id
 router.get("/:id", userController.getUserById);
 
-//get user by name
-router.get("/info/:name", userController.getUserByName);
-
 //update user
 router.put("/:id", userController.updateUser);
 

@@ -4,24 +4,29 @@ const PostSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true
+      required: true,
     },
     desc: {
       type: String,
-      required: true
+      required: true,
     },
     photo: {
       type: String,
-      required: false,
+      required: true,
     },
-    username: {
+    cloudinaryId: {
       type: String,
       required: true,
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     categories: {
-        type: Array,
-        required: false,
-      }
+      type: Array,
+      required: true,
+    },
   },
   { timestamps: true }
 );

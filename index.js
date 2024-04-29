@@ -4,7 +4,9 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/database");
 const cors = require("cors");
 const multer = require("multer");
-const path = require("path");
+
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
@@ -16,32 +18,53 @@ app.use(cors());
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use("/images", express.static(path.join(__dirname, "/images")));
 
-
-
+//db connection
 connectDB();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "images");
-  },
-  filename: (req, file, cb) => {
-    cb(null, req.body.name);
+//file upload and storage-----------
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "blog",
   },
 });
+
+function parsePublicId(cloudinaryUrl) {
+  const parts = cloudinaryUrl.split("/");
+  // Find the index of 'blog' which precedes the public ID
+  const uploadIndex = parts.indexOf("blog");
+  // The public ID is the next part after 'blog'
+  if (uploadIndex !== -1 && uploadIndex < parts.length - 1) {
+    return parts[uploadIndex + 1].split(".")[0];
+  } else {
+    return null;
+  }
+}
 
 const upload = multer({ storage: storage });
 
+// Handle file upload
 app.post("/api/upload", upload.single("file"), (req, res) => {
-  res.status(200).json("File has been uploaded.");
+  const publicId = parsePublicId(req.file.path);
+  res.json({ url: req.file.path, id: publicId });
 });
+//----------------------
 
+//routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/categories", categoryRoutes);
 
+//listen to port
 app.listen(process.env.PORT, () => {
   console.log("Server is running...");
 });

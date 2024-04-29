@@ -1,9 +1,17 @@
 const Post = require("../models/Post");
+const cloudinary = require("../middleware/cloudinary");
 
 module.exports = {
   createPost: async (req, res) => {
-    const newPost = new Post(req.body);
     try {
+      const newPost = new Post({
+        title: req.body.title,
+        photo: req.body.photo,
+        cloudinaryId: req.body.cloudinaryId,
+        desc: req.body.desc,
+        user: req.body.user,
+        categories: req.body.categories,
+      });
       const savedPost = await newPost.save();
       res.status(200).json(savedPost);
     } catch (error) {
@@ -23,27 +31,16 @@ module.exports = {
   updatePost: async (req, res) => {
     try {
       const post = await Post.findById(req.params.id);
-      try {
-        if (post.username === req.body.username) {
-          try {
-            const updatedPost = await Post.findByIdAndUpdate(
-              req.params.id,
-              {
-                $set: req.body,
-              },
-              { new: true }
-            );
+      await cloudinary.uploader.destroy("blog/" + post.cloudinaryId);
+      const updatedPost = await Post.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: req.body,
+        },
+        { new: true }
+      );
 
-            res.status(200).json(updatedPost);
-          } catch (error) {
-            res.status(500).json(error);
-          }
-        } else {
-          res.status(401).json("You can only update your own post.");
-        }
-      } catch (error) {
-        res.status(500).json(error);
-      }
+      res.status(200).json(updatedPost);
     } catch (error) {
       res.status(500).json(error);
     }
@@ -52,51 +49,42 @@ module.exports = {
   deletePost: async (req, res) => {
     try {
       const post = await Post.findById(req.params.id);
-      try {
-        if (post.username === req.body.username) {
-          try {
-            await post.deleteOne();
-
-            res.status(200).json("Post deleted.");
-          } catch (error) {
-            console.log(error);
-            res.status(500).json(error);
-          }
-        } else {
-          res.status(401).json("You can only delete your own post.");
-        }
-      } catch (error) {
-        res.status(500).json(error);
-      }
+      await cloudinary.uploader.destroy("blog/" + post.cloudinaryId);
+      await post.deleteOne();
+      res.status(200).json("Post deleted.");
     } catch (error) {
       res.status(500).json(error);
     }
   },
 
   getPostsByQuery: async (req, res) => {
-    const username = req.query.user;
+    const user = req.query.user;
     const category = req.query.category;
 
     try {
       let posts;
 
-      if (username && category) {
+      if (user && category) {
         posts = await Post.find({
-          username,
+          user,
           categories: {
             $in: [category],
           },
-        });
-      } else if (username) {
-        posts = await Post.find({ username });
+        })
+          .sort({ createdAt: "desc" })
+          .lean();
+      } else if (user) {
+        posts = await Post.find({ user }).sort({ createdAt: "desc" }).lean();
       } else if (category) {
         posts = await Post.find({
           categories: {
             $in: [category],
           },
-        });
+        })
+          .sort({ createdAt: "desc" })
+          .lean();
       } else {
-        posts = await Post.find();
+        posts = await Post.find().sort({ createdAt: "desc" }).lean();
       }
 
       res.status(200).json(posts);

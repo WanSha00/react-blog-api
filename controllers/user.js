@@ -14,17 +14,6 @@ module.exports = {
     }
   },
 
-  getUserByName: async (req, res) => {
-    try {
-      const user = await User.findOne({ username: req.params.name });
-      const { password, ...others } = user._doc;
-      res.status(200).json(others);
-    } catch (error) {
-      console.log(error);
-      res.status(404).json("User not found.");
-    }
-  },
-
   updateUser: async (req, res) => {
     if (req.body.userID === req.params.id) {
       if (req.body.password) {
