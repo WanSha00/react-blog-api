@@ -16,9 +16,15 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    profilePic: {
+    photo: {
       type: String,
-      default: "",
+      required: false,
+      default: ""
+    },
+    cloudinaryId: {
+      type: String,
+      required: false,
+      default: ""
     },
     bio: {
       type: String,

@@ -2,6 +2,7 @@ const User = require("../models/User");
 const Post = require("../models/Post");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+const cloudinary = require("../middleware/cloudinary");
 
 module.exports = {
   getUserById: async (req, res) => {
@@ -15,58 +16,49 @@ module.exports = {
   },
 
   updateUser: async (req, res) => {
-    if (req.body.userID === req.params.id) {
-      if (req.body.password) {
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hash = await bcrypt.hash(req.body.password, salt);
-        req.body.password = hash;
-      }
+    const user = await User.findById(req.params.id);
+    if (req.body.cloudinaryId !== user.cloudinaryId) {
+      await cloudinary.uploader.destroy("blog/" + user.cloudinaryId);
+    }
 
-      try {
-        if (req.body.username) {
-          const prevUser = await User.findById(req.params.id);
-          await Post.updateMany(
-            { username: prevUser.username },
-            { $set: { username: req.body.username } }
-          );
-        }
+    if(req.body.password!==""){
+      const salt = await bcrypt.genSalt(saltRounds);
+      const hash = await bcrypt.hash(req.body.password, salt);
+      req.body.password = hash;
+    }else{
+      req.body.password = user.password;
+    }    
 
-        const updatedUser = await User.findByIdAndUpdate(
-          req.params.id,
-          {
-            $set: req.body,
-          },
-          { new: true }
-        );
+    try {
+      const updatedUser = await User.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: req.body,
+        },
+        { new: true }
+      );
 
-        res.status(200).json(updatedUser);
-      } catch (error) {
-        console.log(error);
-        res.status(500).json(error);
-      }
-    } else {
-      res.status(401).json("You can only update your account.");
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).json(error);
     }
   },
 
   deleteUser: async (req, res) => {
-    if (req.body.userID === req.params.id) {
-      try {
-        const user = await User.findById(req.params.id);
-        try {
-          const userPost = await Post.find({ username: user.username });
-          await Post.deleteMany({ username: user.username });
-          await User.findByIdAndDelete(req.params.id);
+    try {
+      const posts = await Post.find({ user: req.params.id });
+      posts.map((post) => {
+        cloudinary.uploader.destroy("blog/" + post.cloudinaryId);
+      });
 
-          res.status(200).json("User has been deleted.");
-        } catch (error) {
-          res.status(500).json(error);
-        }
-      } catch (error) {
-        res.status(404).json("User not found.");
-      }
-    } else {
-      res.status(401).json("You can only delete your account.");
+      const user = await User.findById(req.params.id);
+      await cloudinary.uploader.destroy("blog/" + user.cloudinaryId);
+      await Post.deleteMany({ user: req.params.id });
+      await User.findByIdAndDelete(req.params.id);
+
+      res.status(200).json("User has been deleted.");
+    } catch (error) {
+      res.status(500).json(error);
     }
   },
 };
