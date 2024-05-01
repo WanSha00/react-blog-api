@@ -59,6 +59,9 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
 //----------------------
 
 //routes
+app.get("/api/", (req,res) =>{
+  res.send("api connected");
+})
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
