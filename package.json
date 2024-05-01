@@ -7,7 +7,7 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "install-deps": "npm install --force"
+    "install": "npm install --force"
   },
   "author": "",
   "license": "ISC",
