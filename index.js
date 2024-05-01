@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/database");
 const cors = require("cors");
 const multer = require("multer");
+const bodyParser = require('body-parser');
 
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -16,8 +17,8 @@ const categoryRoutes = require("./routes/categories");
 dotenv.config();
 app.use(cors());
 app.use(express.static("public"));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(bodyParser.json()); 
+app.use(bodyParser.urlencoded({ extended: true }));
 
 //db connection
 connectDB();
