@@ -54,8 +54,15 @@ const upload = multer({ storage: storage });
 
 // Handle file upload
 app.post("/api/upload", upload.single("file"), (req, res) => {
-  const publicId = parsePublicId(req.file.path);
+  try {
+    const publicId = parsePublicId(req.file.path);
   res.json({ url: req.file.path, id: publicId });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+    
+  }
+  
 });
 //----------------------
 
